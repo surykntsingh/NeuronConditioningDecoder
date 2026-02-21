@@ -274,7 +274,7 @@ if __name__=="__main__":
     device = accelerator.device
 
     model.to(device)
-    model = train_decoder(model, dataloader, epochs=5, device=device)
+    model = train_decoder(model, dataloader, accelerator, epochs=5)
 
     accelerator.wait_for_everyone()
     unwrapped_model = accelerator.unwrap_model(model)
