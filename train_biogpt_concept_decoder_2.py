@@ -254,6 +254,6 @@ if __name__=="__main__":
 
     accelerator.wait_for_everyone()
     unwrapped_model = accelerator.unwrap_model(model)
-    torch.save(unwrapped_model.state_dict(), "models/decoder/neuron_decoder_lora_multigpu_1.pt")
+    torch.save(unwrapped_model.state_dict(), "models/decoder/neuron_decoder_lora_multigpu_2.pt")
 
 
