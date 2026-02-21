@@ -248,8 +248,8 @@ def train_decoder(model, dataloader,accelerator, epochs=10, lr=1e-6):
 
 
 if __name__=="__main__":
-    
-    data_path = 'cbmad_outputs/neuron_activations_new.pt'
+    base_path = '/mnt/surya/projects/Wsi-rgen/notebooks'
+    data_path = base_path +'/'+ 'cbmad_outputs/neuron_activations_new.pt'
 
     tokenizer = BioGptTokenizer.from_pretrained("microsoft/biogpt")
 
