@@ -202,8 +202,8 @@ def train_decoder(model, dataloader,accelerator, epochs=10, lr=1e-6):
     )
 
     model, optimizer, dataloader = accelerator.prepare(
-    	model, optimizer, dataloader
-	)
+        model, optimizer, dataloader
+    )
 
     for epoch in range(epochs):
         model.train()
@@ -228,9 +228,9 @@ def train_decoder(model, dataloader,accelerator, epochs=10, lr=1e-6):
 
             loss.backward()
             torch.nn.utils.clip_grad_norm_(
-			    filter(lambda p: p.requires_grad, model.parameters()),
-			    1.0
-			)
+                filter(lambda p: p.requires_grad, model.parameters()),
+                1.0
+            )
 
             optimizer.step()
 
@@ -248,35 +248,36 @@ def train_decoder(model, dataloader,accelerator, epochs=10, lr=1e-6):
 
 
 if __name__=="__main__":
-	data_path = 'cbmad_outputs/neuron_activations_new.pt'
+    
+    data_path = 'cbmad_outputs/neuron_activations_new.pt'
 
     tokenizer = BioGptTokenizer.from_pretrained("microsoft/biogpt")
-    
-	ds = ConceptDecoderDataset(data_path,tokenizer)
+
+    ds = ConceptDecoderDataset(data_path,tokenizer)
 
 
-	batch_size = 32
-	# device = 'cuda'
-	dataloader = DataLoader(
-	        ds,
-	        batch_size=batch_size,
-	        shuffle=True,
-	        drop_last=True
-	    )
-	model = LoRANeuronConditionedDecoder(
-	        image_dim=512,
-	        prefix_length=2,
-	        lora_r=16
-	    )
+    batch_size = 32
+    # device = 'cuda'
+    dataloader = DataLoader(
+            ds,
+            batch_size=batch_size,
+            shuffle=True,
+            drop_last=True
+        )
+    model = LoRANeuronConditionedDecoder(
+            image_dim=512,
+            prefix_length=2,
+            lora_r=16
+        )
 
-	accelerator = Accelerator(mixed_precision="fp16")
-	device = accelerator.device
+    accelerator = Accelerator(mixed_precision="fp16")
+    device = accelerator.device
 
-	model.to(device)
-	model = train_decoder(model, dataloader, epochs=5, device=device)
+    model.to(device)
+    model = train_decoder(model, dataloader, epochs=5, device=device)
 
-	accelerator.wait_for_everyone()
-	unwrapped_model = accelerator.unwrap_model(model)
-	torch.save(unwrapped_model.state_dict(), "models/decoder/neuron_decoder_lora_multigpu_1.pt")
+    accelerator.wait_for_everyone()
+    unwrapped_model = accelerator.unwrap_model(model)
+    torch.save(unwrapped_model.state_dict(), "models/decoder/neuron_decoder_lora_multigpu_1.pt")
 
 
