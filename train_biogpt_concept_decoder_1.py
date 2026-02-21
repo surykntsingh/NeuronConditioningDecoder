@@ -50,7 +50,7 @@ class ConceptDecoderDataset(Dataset):
                 self.samples.append({
                     "image_embedding": image_embeddings[image_ids[idx]],
                     "z_k": concept_scores[idx].unsqueeze(0),
-                    "text": concept_texts[k]
+                    "text": "Radiographic finding: " + concept_texts[k]
                 })
 
     def get_transformation(self):
@@ -87,15 +87,14 @@ class ConceptDecoderDataset(Dataset):
             'label': item["text"]
         }
 
-class LoRANeuronConditionedDecoder(nn.Module):
-    def __init__(self, image_dim,lora_r, prefix_length=5, lm_name="microsoft/biogpt"):
+class LoRAConditionTokenDecoder(nn.Module):
+    def __init__(self, image_dim, lora_r=8, lm_name="microsoft/biogpt"):
         super().__init__()
 
         self.tokenizer = BioGptTokenizer.from_pretrained(lm_name)
         base_model = BioGptForCausalLM.from_pretrained(lm_name)
-        self.prefix_scale = 1
 
-        # ---- Apply LoRA ----
+        # ---- LoRA ----
         lora_config = LoraConfig(
             r=lora_r,
             lora_alpha=16,
@@ -104,7 +103,7 @@ class LoRANeuronConditionedDecoder(nn.Module):
             bias="none",
             task_type="CAUSAL_LM"
         )
-        
+
         self.lm = get_peft_model(base_model, lora_config)
 
         # Freeze base weights
@@ -112,74 +111,48 @@ class LoRANeuronConditionedDecoder(nn.Module):
             if "lora" not in name:
                 param.requires_grad = False
 
-        self.prefix_length = prefix_length
         self.hidden_dim = self.lm.config.hidden_size
 
-        # ---- FiLM layers ----
+        # ---- FiLM modulation ----
         self.gamma_proj = nn.Linear(1, image_dim)
-        self.beta_proj = nn.Linear(1, image_dim)
+        self.beta_proj  = nn.Linear(1, image_dim)
 
-        # ---- Neuron conditioning projection ----
-        self.prefix_proj = nn.Sequential(
-            nn.Linear(image_dim, image_dim),
-            nn.ReLU(),
-            nn.Linear(image_dim, prefix_length * self.hidden_dim)
+        # ---- Project to LM hidden dim ----
+        self.cond_proj = nn.Sequential(
+            nn.Linear(image_dim, self.hidden_dim),
+            nn.Tanh()
         )
-        # Precompute LM embedding std for scale matching
-        with torch.no_grad():
-            emb_std = self.lm.get_input_embeddings().weight.std()
-            print(f'emb_std: {emb_std}')
-        self.register_buffer("lm_embedding_std", emb_std)
 
     def forward(self, image_embeddings, z_k, input_ids, attention_mask):
 
         B = image_embeddings.size(0)
-        image_embeddings = image_embeddings.squeeze(1)
-        gamma = torch.tanh(self.gamma_proj(z_k))  # [-1, 1]
-        beta  = torch.tanh(self.beta_proj(z_k))
 
-        # Scale modulation strength (important for stability)
-        gamma = 0.1 * gamma
-        beta  = 0.1 * beta
+        if image_embeddings.dim() == 3:
+            image_embeddings = image_embeddings.squeeze(1)
+
+        # ---- FiLM ----
+        gamma = torch.tanh(self.gamma_proj(z_k)) * 0.1
+        beta  = torch.tanh(self.beta_proj(z_k))  * 0.1
 
         h_mod = (1 + gamma) * image_embeddings + beta
 
-        # # ---- Concatenate neuron scalar ----
-        # conditioning_input = torch.cat([image_embeddings, z_k], dim=1)
-        # print(f'image_embeddings: {image_embeddings.shape}, gamma: {gamma.shape}, beta: {beta.shape}')
-        prefix = self.prefix_proj(h_mod)
+        # ---- Conditioning token embedding ----
+        cond_token = self.cond_proj(h_mod)  # [B, hidden_dim]
+        cond_token = cond_token.unsqueeze(1)  # [B, 1, hidden_dim]
 
-        # print(f'prefix: {prefix.shape}, self.hidden_dim: {self.hidden_dim}')
-
-        prefix = prefix.view(B, self.prefix_length, self.hidden_dim)
-
-        # ---- Stability normalization ----
-        prefix = torch.tanh(prefix)  # bound values
-        # prefix = F.normalize(prefix, dim=-1)  # unit norm per token
-        prefix = prefix * self.prefix_scale #self.lm_embedding_std  # match LM scale
-
-        # ---- Token embeddings ----
+        # ---- Text token embeddings ----
         token_embeds = self.lm.get_input_embeddings()(input_ids)
 
-        # ---- Concatenate prefix tokens ----
-        inputs_embeds = torch.cat([prefix, token_embeds], dim=1)
-
+        # ---- Concatenate ----
+        inputs_embeds = torch.cat([cond_token, token_embeds], dim=1)
 
         # ---- Adjust attention mask ----
-        prefix_mask = torch.ones(
-            B, self.prefix_length,
-            device=attention_mask.device
-        )
+        cond_mask = torch.ones(B, 1, device=attention_mask.device)
+        attention_mask = torch.cat([cond_mask, attention_mask], dim=1)
 
-        attention_mask = torch.cat([prefix_mask, attention_mask], dim=1)
-
-        # Labels (ignore prefix tokens)
-        prefix_labels = torch.full(
-            (B, self.prefix_length),
-            -100,
-            device=input_ids.device
-        )
-        labels = torch.cat([prefix_labels, input_ids], dim=1)
+        # ---- Labels (ignore cond token position) ----
+        cond_labels = torch.full((B, 1), -100, device=input_ids.device)
+        labels = torch.cat([cond_labels, input_ids], dim=1)
 
         outputs = self.lm(
             inputs_embeds=inputs_embeds,
@@ -264,9 +237,8 @@ if __name__=="__main__":
             shuffle=True,
             drop_last=True
         )
-    model = LoRANeuronConditionedDecoder(
+    model = LoRAConditionTokenDecoder(
             image_dim=512,
-            prefix_length=2,
             lora_r=16
         )
 
