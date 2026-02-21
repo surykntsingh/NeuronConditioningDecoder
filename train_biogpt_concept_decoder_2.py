@@ -34,10 +34,14 @@ class ConceptDecoderDataset(Dataset):
         concept_texts = data_dict['concept_texts']
         concept_matrix = data_dict['activations']
         image_embeddings = data_dict['image_embeddings']
+        print(
+            f'before::: mean: {concept_matrix.mean()} std: {concept_matrix.std()} max: {concept_matrix.max()} min: {concept_matrix.min()}')
 
         concept_matrix = (concept_matrix - concept_matrix.mean(dim=0)) / (
                 concept_matrix.std(dim=0) + 1e-6
         )
+        print(
+            f'after::: mean: {concept_matrix.mean()} std: {concept_matrix.std()} max: {concept_matrix.max()} min: {concept_matrix.min()}')
 
         N,K = len(image_ids), len(concept_texts)
         print(f'concept_matrix.shape: {concept_matrix.shape}, (N,K): {(N,K)}')
@@ -226,7 +230,7 @@ def train_decoder(model, dataloader,accelerator, epochs=10, lr=1e-6):
 
 if __name__=="__main__":
     base_path = '/mnt/surya/projects/Wsi-rgen/notebooks'
-    data_path = base_path +'/'+ 'cbmad_outputs/neuron_activations_new.pt'
+    data_path = base_path +'/'+ 'cbmad_outputs/clip_activations.pt'
 
     tokenizer = BioGptTokenizer.from_pretrained("microsoft/biogpt")
 
