@@ -226,7 +226,7 @@ def train_decoder(model, dataloader,accelerator, epochs=10, lr=1e-6):
                 attention_mask
             )
 
-            loss.backward()
+            accelerator.backward(loss)
             torch.nn.utils.clip_grad_norm_(
                 filter(lambda p: p.requires_grad, model.parameters()),
                 1.0
