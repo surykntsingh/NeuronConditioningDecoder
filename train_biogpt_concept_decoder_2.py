@@ -35,9 +35,9 @@ class ConceptDecoderDataset(Dataset):
         print(
             f'before::: mean: {concept_matrix.mean()} std: {concept_matrix.std()} max: {concept_matrix.max()} min: {concept_matrix.min()}')
 
-        # concept_matrix = (concept_matrix - concept_matrix.mean(dim=0)) / (
-        #         concept_matrix.std(dim=0) + 1e-6
-        # )
+        concept_matrix = (concept_matrix - concept_matrix.mean(dim=0)) / (
+                concept_matrix.std(dim=0) + 1e-6
+        )
 
         # std = concept_matrix.std(dim=0)
         # std = torch.clamp(std, min=0.01)
