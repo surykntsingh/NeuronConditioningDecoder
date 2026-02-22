@@ -46,7 +46,7 @@ class ConceptDecoderDataset(Dataset):
         # concept_matrix = torch.clamp(concept_matrix, -3, 3)
 
         concept_matrix = concept_matrix * 2
-        concept_matrix = torch.clamp(concept_matrix, -0.5, 0.5)
+        # concept_matrix = torch.clamp(concept_matrix, -0.5, 0.5)
 
         print(
             f'after::: mean: {concept_matrix.mean()} std: {concept_matrix.std()} max: {concept_matrix.max()} min: {concept_matrix.min()}')
