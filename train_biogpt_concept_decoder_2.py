@@ -15,7 +15,7 @@ BASE_PATH = '/mnt/surya/dataset/rsna_pneumonia/rsna_pnumonia_challenge/data/kagg
 train_data_dir = f'{BASE_PATH}/stage_2_train_images'
 
 class ConceptDecoderDataset(Dataset):
-    def __init__(self, data_path, tokenizer, top_k=0.2):
+    def __init__(self, data_path, tokenizer, top_k=0.9):
         """
         image_embeddings: [N, D]
         concept_matrix: [N, K]
@@ -231,7 +231,7 @@ if __name__=="__main__":
 
     tokenizer = BioGptTokenizer.from_pretrained("microsoft/biogpt")
 
-    ds = ConceptDecoderDataset(data_path,tokenizer)
+    ds = ConceptDecoderDataset(data_path,tokenizer, top_k=0.9)
 
 
     batch_size = 32
