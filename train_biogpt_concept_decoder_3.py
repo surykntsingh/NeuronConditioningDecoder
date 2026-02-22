@@ -21,8 +21,8 @@ class ConceptDecoderDataset(Dataset):
 
         data_dict = torch.load(data_path, map_location="cpu")
 
-        concept_matrix = data_dict["activations"].float()
-        image_embeddings = data_dict["image_embeddings"].float()
+        concept_matrix = data_dict["activations"]
+        image_embeddings = data_dict["image_embeddings"]
         concept_texts = data_dict["concept_texts"]
 
         N, K = concept_matrix.shape
