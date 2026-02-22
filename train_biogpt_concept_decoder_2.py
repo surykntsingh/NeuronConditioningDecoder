@@ -69,7 +69,7 @@ class ConceptDecoderDataset(Dataset):
                     "text": "Radiographic finding: " + concept_texts[k]
                 })
         print(len(self.samples))
-        self.samples = self.samples[:7000]
+        # self.samples = self.samples[:7000]
 
     def __len__(self):
         return len(self.samples)
