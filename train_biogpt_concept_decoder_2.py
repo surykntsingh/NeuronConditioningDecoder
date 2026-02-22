@@ -26,7 +26,7 @@ class ConceptDecoderDataset(Dataset):
         self.tokenizer = tokenizer
 
 
-        data_dict = torch.load(data_path)
+        data_dict = torch.load(data_path, map_location="cpu")
 
         image_ids = data_dict['image_ids']
         concept_texts = data_dict['concept_texts']
@@ -247,7 +247,7 @@ if __name__=="__main__":
             lora_r=8
         )
 
-    accelerator = Accelerator(mixed_precision="fp16")
+    accelerator = Accelerator(mixed_precision="bf16")
     device = accelerator.device
 
     # model.to(device)
