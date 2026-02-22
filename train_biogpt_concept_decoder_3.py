@@ -210,7 +210,7 @@ if __name__=="__main__":
 
     tokenizer = BioGptTokenizer.from_pretrained("microsoft/biogpt")
 
-    ds = ConceptDecoderDataset(data_path,tokenizer, top_k=0.9)
+    ds = ConceptDecoderDataset(data_path,tokenizer)
 
 
     batch_size = 32
