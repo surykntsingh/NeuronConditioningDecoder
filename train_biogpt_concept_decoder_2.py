@@ -21,8 +21,6 @@ class ConceptDecoderDataset(Dataset):
         concept_matrix: [N, K]
         glossary_texts: list of length K
         """
-        # self.__backbone_utils = backbone_utils
-        # self.__image_size = image_size
         
         self.samples = []
         self.tokenizer = tokenizer
@@ -37,9 +35,16 @@ class ConceptDecoderDataset(Dataset):
         print(
             f'before::: mean: {concept_matrix.mean()} std: {concept_matrix.std()} max: {concept_matrix.max()} min: {concept_matrix.min()}')
 
-        concept_matrix = (concept_matrix - concept_matrix.mean(dim=0)) / (
-                concept_matrix.std(dim=0) + 1e-6
-        )
+        # concept_matrix = (concept_matrix - concept_matrix.mean(dim=0)) / (
+        #         concept_matrix.std(dim=0) + 1e-6
+        # )
+
+        std = concept_matrix.std(dim=0)
+        std = torch.clamp(std, min=0.01)
+
+        concept_matrix = (concept_matrix - concept_matrix.mean(dim=0)) / std
+        concept_matrix = torch.clamp(concept_matrix, -3, 3)
+
         print(
             f'after::: mean: {concept_matrix.mean()} std: {concept_matrix.std()} max: {concept_matrix.max()} min: {concept_matrix.min()}')
 
@@ -61,19 +66,6 @@ class ConceptDecoderDataset(Dataset):
                     "text": "Radiographic finding: " + concept_texts[k]
                 })
 
-    def get_transformation(self):
-        return transforms.Compose([
-                transforms.Resize(self.__image_size),
-                transforms.Grayscale(num_output_channels=1)
-            ])
-    
-    # def __get_image_embedding(self, image_id):
-    #     img = self.__backbone_utils.read_image(image_id)
-    #     img = self.get_transformation()(img)
-    #     img_embedding = self.__backbone_utils.get_image_embedding(img)
-    #     return img_embedding
-
-        
     def __len__(self):
         return len(self.samples)
 
@@ -247,10 +239,10 @@ if __name__=="__main__":
         )
     model = LoRAConditionTokenDecoder(
             image_dim=512,
-            lora_r=16
+            lora_r=8
         )
 
-    accelerator = Accelerator(mixed_precision="fp16")
+    accelerator = Accelerator(mixed_precision="bf16")
     device = accelerator.device
 
     # model.to(device)
@@ -258,6 +250,6 @@ if __name__=="__main__":
 
     accelerator.wait_for_everyone()
     unwrapped_model = accelerator.unwrap_model(model)
-    torch.save(unwrapped_model.state_dict(), "models/decoder/neuron_decoder_lora_multigpu_2.pt")
+    torch.save(unwrapped_model.state_dict(), "models/decoder/neuron_decoder_lora_multigpu_3.pt")
 
 
