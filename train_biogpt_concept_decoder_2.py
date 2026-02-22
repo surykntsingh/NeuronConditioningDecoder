@@ -68,6 +68,8 @@ class ConceptDecoderDataset(Dataset):
                     "z_k": concept_scores[idx].unsqueeze(0),
                     "text": "Radiographic finding: " + concept_texts[k]
                 })
+        print(len(self.samples))
+        self.samples = self.samples[:7000]
 
     def __len__(self):
         return len(self.samples)
@@ -245,7 +247,7 @@ if __name__=="__main__":
             lora_r=8
         )
 
-    accelerator = Accelerator(mixed_precision="bf16")
+    accelerator = Accelerator(mixed_precision="fp16")
     device = accelerator.device
 
     # model.to(device)
