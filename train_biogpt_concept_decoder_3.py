@@ -24,6 +24,7 @@ class ConceptDecoderDataset(Dataset):
         concept_matrix = data_dict["activations"]
         image_embeddings = data_dict["image_embeddings"]
         concept_texts = data_dict["concept_texts"]
+        image_ids = data_dict['image_ids']
 
         N, K = concept_matrix.shape
 
@@ -45,7 +46,7 @@ class ConceptDecoderDataset(Dataset):
                     text = f"Radiographic finding: Possible {concept_name}."
 
                 self.samples.append({
-                    "image_embedding": image_embeddings[i],
+                    "image_embedding": image_embeddings[image_ids[i]],
                     "z_k": torch.tensor([z], dtype=torch.float32),
                     "text": text
                 })
