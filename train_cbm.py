@@ -47,7 +47,7 @@ class MedCLIPModelUtils():
         return image_embeddings.squeeze(1)
 
     def get_text_embedding(self, text):
-        text_inputs = self.__processor(text=text, return_tensors="pt", padding=True).to('cuda'
+        text_inputs = self.__processor(text=text, return_tensors="pt", padding=True).to('cuda')
         # text_inputs = {k: v.to('cuda') for k, v in text_inputs.items()}
 
         with torch.no_grad():
