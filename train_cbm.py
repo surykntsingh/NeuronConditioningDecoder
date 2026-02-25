@@ -21,7 +21,7 @@ from tqdm import tqdm
 
 
 class MedCLIPModelUtils():
-    def __init__(self, base_path, device):
+    def __init__(self, base_path, device='cuda'):
         from medclip import MedCLIPModel, MedCLIPVisionModelViT, MedCLIPVisionModel, PromptClassifier
         from medclip import MedCLIPProcessor
         self.__base_path = base_path
@@ -39,7 +39,7 @@ class MedCLIPModelUtils():
         return Image.fromarray(pixels)
 
     def get_image_embedding(self, image):
-        inputs = self.__processor(images=image, return_tensors="pt", padding=True)
+        inputs = self.__processor(images=image, return_tensors="pt", padding=True).to('cuda')
 
         with torch.no_grad():
             image_embeddings = self.__vlm_model.encode_image(inputs["pixel_values"])
@@ -47,8 +47,8 @@ class MedCLIPModelUtils():
         return image_embeddings.squeeze(1)
 
     def get_text_embedding(self, text):
-        text_inputs = self.__processor(text=text, return_tensors="pt", padding=True)
-        text_inputs = {k: v.to('cuda') for k, v in text_inputs.items()}
+        text_inputs = self.__processor(text=text, return_tensors="pt", padding=True).to('cuda'
+        # text_inputs = {k: v.to('cuda') for k, v in text_inputs.items()}
 
         with torch.no_grad():
             text_embeddings = self.__vlm_model.encode_text(text_inputs["input_ids"])
