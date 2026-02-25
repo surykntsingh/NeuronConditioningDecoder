@@ -21,13 +21,13 @@ from tqdm import tqdm
 
 
 class MedCLIPModelUtils():
-    def __init__(self, base_path):
+    def __init__(self, base_path, device):
         from medclip import MedCLIPModel, MedCLIPVisionModelViT, MedCLIPVisionModel, PromptClassifier
         from medclip import MedCLIPProcessor
         self.__base_path = base_path
         self.__vlm_model = MedCLIPModel(vision_cls=MedCLIPVisionModelViT)
         self.__vlm_model.from_pretrained()
-        # self.__vlm_model.cuda()
+        self.__vlm_model = self.__vlm_model.cuda()
         self.__processor = MedCLIPProcessor()
 
     def read_image(self, image_id):
