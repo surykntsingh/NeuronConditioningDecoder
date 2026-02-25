@@ -27,7 +27,7 @@ class MedCLIPModelUtils():
         self.__base_path = base_path
         self.__vlm_model = MedCLIPModel(vision_cls=MedCLIPVisionModelViT)
         self.__vlm_model.from_pretrained()
-        # self.__vlm_model = torch.nn.DataParallel(self.__vlm_model)
+        self.__vlm_model = torch.nn.DataParallel(self.__vlm_model)
 
         self.__vlm_model = self.__vlm_model.to(device)
         self.__processor = MedCLIPProcessor()
