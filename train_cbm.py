@@ -27,7 +27,7 @@ class MedCLIPModelUtils():
         self.__base_path = base_path
         self.__vlm_model = MedCLIPModel(vision_cls=MedCLIPVisionModelViT)
         self.__vlm_model.from_pretrained()
-        self.__vlm_model = torch.nn.DataParallel(self.__vlm_model)
+        # self.__vlm_model = torch.nn.DataParallel(self.__vlm_model)
 
         self.__vlm_model = self.__vlm_model.to(device)
         self.__processor = MedCLIPProcessor()
@@ -48,6 +48,7 @@ class MedCLIPModelUtils():
 
     def get_text_embedding(self, text):
         text_inputs = self.__processor(text=text, return_tensors="pt", padding=True)
+        text_inputs = {k: v.to('cuda') for k, v in text_inputs.items()}
 
         with torch.no_grad():
             text_embeddings = self.__vlm_model.encode_text(text_inputs["input_ids"])
