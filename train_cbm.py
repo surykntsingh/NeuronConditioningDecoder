@@ -36,10 +36,11 @@ class MedCLIPModelUtils():
         img_path = f'{self.__base_path}/{image_id}.dcm'
         dicom_image = pydicom.dcmread(img_path)
         pixels = dicom_image.pixel_array
-        return Image.fromarray(pixels)
+        return Image.fromarray(pixels).to('cuda')
 
     def get_image_embedding(self, image):
         inputs = self.__processor(images=image, return_tensors="pt", padding=True).to('cuda')
+        print(f'inputs["pixel_values"]: {inputs["pixel_values"].device}')
 
         with torch.no_grad():
             image_embeddings = self.__vlm_model.encode_image(inputs["pixel_values"])
