@@ -404,7 +404,7 @@ class ConceptTrainer():
             {
                 'name': concept['name'],
                 'texts': concept['texts'],
-                'embeddings': torch.mean(backbone_utils.get_text_embedding(concept['texts']), dim=0)
+                'embeddings': torch.mean(backbone_utils.get_text_embedding(concept['texts']).cuda(), dim=0)
             } for concept in concept_features
         ]
 
