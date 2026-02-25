@@ -40,7 +40,7 @@ class MedCLIPModelUtils():
         inputs = self.__processor(images=image, return_tensors="pt", padding=True)
 
         with torch.no_grad():
-            image_embeddings = self.__vlm_model.encode_image(inputs["pixel_values"].cuda())
+            image_embeddings = self.__vlm_model.encode_image(inputs["pixel_values"])
 
         return image_embeddings.squeeze(1)
 
@@ -404,7 +404,7 @@ class ConceptTrainer():
             {
                 'name': concept['name'],
                 'texts': concept['texts'],
-                'embeddings': torch.mean(backbone_utils.get_text_embedding(concept['texts']).to('cpu'), dim=0).cuda()
+                'embeddings': torch.mean(backbone_utils.get_text_embedding(concept['texts']), dim=0)
             } for concept in concept_features
         ]
 
