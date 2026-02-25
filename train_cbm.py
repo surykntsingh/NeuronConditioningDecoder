@@ -519,7 +519,7 @@ class ConceptTrainer():
 
         return test_metrics
 
-    def predict(self, df, devices = (1,2,3,4,5,6,7), fast_dev_run):
+    def predict(self, df, devices = (1,2,3,4,5,6,7), fast_dev_run=False):
         ds = ConceptDataset(df, self.backbone_utils)
         dataloader = DataLoader(ds, batch_size=self.__batch_size, shuffle=False)
         trainer = pl.Trainer(accelerator='gpu',
@@ -545,6 +545,10 @@ def save_activations(data_df, output_activations, save_path):
     image_ids = data_df['patientId'].tolist()
     image_embeddings = {}
     imgs = []
+    transformations = transforms.Compose([
+        transforms.Resize((1024, 1024)),
+        transforms.Grayscale(num_output_channels=1)
+    ])
 
     loop = tqdm(image_ids, leave=False, total=len(image_ids))
 
