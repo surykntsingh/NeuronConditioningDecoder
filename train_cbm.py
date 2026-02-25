@@ -610,7 +610,7 @@ if __name__=="__main__":
     if not os.path.isdir(checkpoints_dir):
         os.makedirs(checkpoints_dir, exist_ok=True)
 
-    mlu = MedCLIPModelUtils(train_data_dir)
+    mlu = MedCLIPModelUtils(train_data_dir, device='cuda')
     data_df = pd.read_csv(train_csv_path)
 
     final_trainer = ConceptTrainer(data_df, mlu, CONCEPTS, checkpoints_dir, lr=1e-6, alpha=0, beta=0, gamma=2)
