@@ -27,7 +27,7 @@ class MedCLIPModelUtils():
         self.__base_path = base_path
         self.__vlm_model = MedCLIPModel(vision_cls=MedCLIPVisionModelViT)
         self.__vlm_model.from_pretrained()
-        self.__vlm_model.cuda()
+        # self.__vlm_model.cuda()
         self.__processor = MedCLIPProcessor()
 
     def read_image(self, image_id):
