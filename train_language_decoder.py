@@ -144,7 +144,7 @@ class BootstrappedConceptDataset(Dataset):
         self.max_length = max_length
         self.samples = []
 
-        data = torch.load(data_path, map_location="cpu")
+        data = torch.load(data_path)
         Z_s = data["activations"]  # .float()  # CLIP similarity
         images = data["image_embeddings"]  # .float()
         concepts = data["concepts"]
@@ -494,7 +494,7 @@ def train_decoder(model, dataloader,accelerator, epochs=10, lr=1e-6):
 def train_decoder(model, dataloader, accelerator, epochs=10, lr=1e-6, weight_decay=0.01):
     device = accelerator.device
     model.to(device)
-    model.to(device)
+    # model.to(device)
 
     optimizer = torch.optim.AdamW(
         filter(lambda p: p.requires_grad, model.parameters()),
@@ -658,6 +658,7 @@ if __name__=="__main__":
     batch_size = 32
     ds = BootstrappedConceptDataset(data_path, tokenizer, num_bootstrap=50, subset_size=5000, add_noise_std=0.001)
 
+    print(len(ds))
 
     # device = 'cuda'
     dataloader = DataLoader(
