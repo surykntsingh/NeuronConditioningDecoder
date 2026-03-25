@@ -179,7 +179,8 @@ class BootstrappedConceptDataset(Dataset):
         print(f"N={N}, D={D}, K={K}")
         print(f"Bootstrapping {num_bootstrap} samples per concept...")
 
-        for i in range(z):
+        loop = tqdm(range(z), leave=False, total=z)
+        for i in loop:
             for k in range(K):
                 Z_all = Z_s[i]
 
