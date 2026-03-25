@@ -131,6 +131,7 @@ class BootstrappedConceptDataset(Dataset):
             max_length=40,
             add_noise_std=0.0,
             normalize_embedding=True,
+            device='cpu'
     ):
         """
         data_path should contain:
@@ -144,7 +145,7 @@ class BootstrappedConceptDataset(Dataset):
         self.max_length = max_length
         self.samples = []
 
-        data = torch.load(data_path, map_location="cpu")
+        data = torch.load(data_path, map_location=device)
         Z_s = data["activations"]  # .float()  # CLIP similarity
         images = data["image_embeddings"]  # .float()
         concepts = data["concepts"]
@@ -201,14 +202,14 @@ class BootstrappedConceptDataset(Dataset):
                     FtF = Ft @ F_b  # [D, D]
 
                     lambda_reg = 1e-2
-                    FtF_reg = FtF + lambda_reg * torch.eye(D, device='cpu')
+                    FtF_reg = FtF + lambda_reg * torch.eye(D, device=device)
 
                     FtF_inv = torch.linalg.inv(FtF_reg)
 
                     v = FtF_inv @ Ft @ z_b  # [D]
                     # ---- Optional noise ----
                     if add_noise_std > 0:
-                        v = v + add_noise_std * torch.randn_like(v, device='cpu')
+                        v = v + add_noise_std * torch.randn_like(v, device=device)
 
                     # ---- Normalize (recommended) ----
                     if normalize_embedding:
@@ -654,9 +655,11 @@ if __name__=="__main__":
     # data_path = base_path +'/'+ 'cbmad_outputs/clip_activations.pt'
     data_path = base_path +'/'+'cbmad_outputs/rsna_multi_neuron_activations.pt'
     tokenizer = BioGptTokenizer.from_pretrained("microsoft/biogpt")
+    accelerator = Accelerator(mixed_precision="bf16")
+    device = accelerator.device
 
     batch_size = 32
-    ds = BootstrappedConceptDataset(data_path, tokenizer, num_bootstrap=50, subset_size=5000, add_noise_std=0.001)
+    ds = BootstrappedConceptDataset(data_path, tokenizer, num_bootstrap=50, subset_size=5000, add_noise_std=0.001, device = device)
 
     # ds = CbmActivationDataset(data_path, tokenizer)
     print(len(ds))
@@ -673,8 +676,7 @@ if __name__=="__main__":
         lora_r=32
     )
 
-    accelerator = Accelerator(mixed_precision="bf16")
-    device = accelerator.device
+
 
     # model.to(device)
     model = train_decoder(model, dataloader, accelerator, epochs=50, lr=5e-6)
