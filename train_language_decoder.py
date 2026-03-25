@@ -549,7 +549,7 @@ def train_decoder(model, dataloader, accelerator, epochs=10, lr=1e-6, weight_dec
         contrast_loss = total_contrast_loss / len(dataloader)
         print(f"Epoch {epoch+1} | Loss: {train_loss:.4f}| LM: {lm_loss:.4f} | Contrast: {contrast_loss:.4f}")
 
-        return model
+    return model
 
 
 def generate_from_embedding(model, embedding, tokenizer, device='cuda'):
@@ -574,8 +574,8 @@ def generate_from_embedding(model, embedding, tokenizer, device='cuda'):
 
         token_embeds = model.lm.get_input_embeddings()(inputs["input_ids"])
 
-        print(
-            f'cond_token: {cond_token.mean()} {cond_token.std()} token_embeds:{token_embeds.mean()} {token_embeds.std()}')
+        # print(
+        #     f'cond_token: {cond_token.mean()} {cond_token.std()} token_embeds:{token_embeds.mean()} {token_embeds.std()}')
 
         inputs_embeds = torch.cat([cond_token, token_embeds], dim=1)
 
