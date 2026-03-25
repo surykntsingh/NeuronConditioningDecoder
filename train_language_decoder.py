@@ -204,7 +204,7 @@ class BootstrappedConceptDataset(Dataset):
                     lambda_reg = 1e-2
                     FtF_reg = FtF + lambda_reg * torch.eye(D, device=device)
 
-                    FtF_inv = torch.linalg.inv(FtF_reg, device=device)
+                    FtF_inv = torch.linalg.inv(FtF_reg).to(device)
 
                     v = FtF_inv @ Ft @ z_b  # [D]
                     # ---- Optional noise ----
