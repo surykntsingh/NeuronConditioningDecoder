@@ -659,7 +659,7 @@ if __name__=="__main__":
     device = accelerator.device
 
     batch_size = 32
-    ds = BootstrappedConceptDataset(data_path, tokenizer, num_bootstrap=50, subset_size=5000, add_noise_std=0.001, device = device)
+    ds = BootstrappedConceptDataset(data_path, tokenizer, num_bootstrap=50, subset_size=5000, add_noise_std=0.001, device='cpu')
 
     # ds = CbmActivationDataset(data_path, tokenizer)
     print(len(ds))
