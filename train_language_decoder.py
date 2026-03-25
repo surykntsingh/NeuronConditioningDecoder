@@ -208,7 +208,7 @@ class BootstrappedConceptDataset(Dataset):
                     v = FtF_inv @ Ft @ z_b  # [D]
                     # ---- Optional noise ----
                     if add_noise_std > 0:
-                        v = v + add_noise_std * torch.randn_like(v)
+                        v = v + add_noise_std * torch.randn_like(v, device='cpu')
 
                     # ---- Normalize (recommended) ----
                     if normalize_embedding:
