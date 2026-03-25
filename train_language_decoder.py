@@ -144,7 +144,7 @@ class BootstrappedConceptDataset(Dataset):
         self.max_length = max_length
         self.samples = []
 
-        data = torch.load(data_path)
+        data = torch.load(data_path, map_location="cpu")
         Z_s = data["activations"]  # .float()  # CLIP similarity
         images = data["image_embeddings"]  # .float()
         concepts = data["concepts"]
