@@ -201,7 +201,7 @@ class BootstrappedConceptDataset(Dataset):
                     FtF = Ft @ F_b  # [D, D]
 
                     lambda_reg = 1e-2
-                    FtF_reg = FtF + lambda_reg * torch.eye(D, device=F_b.device)
+                    FtF_reg = FtF + lambda_reg * torch.eye(D)
 
                     FtF_inv = torch.linalg.inv(FtF_reg)
 
@@ -656,9 +656,9 @@ if __name__=="__main__":
     tokenizer = BioGptTokenizer.from_pretrained("microsoft/biogpt")
 
     batch_size = 32
-    # ds = BootstrappedConceptDataset(data_path, tokenizer, num_bootstrap=50, subset_size=5000, add_noise_std=0.001)
+    ds = BootstrappedConceptDataset(data_path, tokenizer, num_bootstrap=50, subset_size=5000, add_noise_std=0.001)
 
-    ds = CbmActivationDataset(data_path, tokenizer)
+    # ds = CbmActivationDataset(data_path, tokenizer)
     print(len(ds))
 
     dataloader = DataLoader(
