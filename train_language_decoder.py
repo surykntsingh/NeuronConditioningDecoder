@@ -551,7 +551,7 @@ def train_decoder(model, dataloader, accelerator, epochs=10, lr=1e-6, weight_dec
         return model
 
 
-def generate_from_embedding(model, embedding, tokenizer, device="cuda"):
+def generate_from_embedding(model, embedding, tokenizer, device='cuda'):
     model.eval()
     model.to(device)
 
@@ -656,11 +656,11 @@ if __name__=="__main__":
     tokenizer = BioGptTokenizer.from_pretrained("microsoft/biogpt")
 
     batch_size = 32
-    ds = BootstrappedConceptDataset(data_path, tokenizer, num_bootstrap=50, subset_size=5000, add_noise_std=0.001)
+    # ds = BootstrappedConceptDataset(data_path, tokenizer, num_bootstrap=50, subset_size=5000, add_noise_std=0.001)
 
+    ds = CbmActivationDataset(data_path, tokenizer)
     print(len(ds))
 
-    # device = 'cuda'
     dataloader = DataLoader(
         ds,
         batch_size=batch_size,
